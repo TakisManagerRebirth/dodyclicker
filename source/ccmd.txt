@@ -1,0 +1,14 @@
+this command compiles dodyclicker:
+!pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." DodyClicker10.py
+
+compilation instructions:
+step 1: open a python ide like pycharm or thonny, but preferably thonny
+step 2: open dodyclicker10.py
+step 3: paste line 2 of this text document into the terminal and execute
+step 4: wait for the compilation to finish
+step 5: finished exe is in the dist folder, contained in the same folder this txt is in
+p.s replace 10 with 11 if you're compiling v1.1
+also a side note, this thing has no viruses.
+but since virustotal flags it six times i decided to make it open-source so the user can proofread the sourcecode for viruses. 
+all it does is automate clicks.
+i recommend you choose the latest version for smoothest experience because the previous versions are extremely buggy
