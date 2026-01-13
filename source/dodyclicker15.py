@@ -1,6 +1,5 @@
 import time,threading,ctypes,ctypes.wintypes,queue,tkinter as tk,os,tempfile,shutil,sys
 from tkinter import ttk
-W=1.4
 F="Segoe UI"
 u32=ctypes.windll.user32
 k32=ctypes.windll.kernel32
@@ -13,6 +12,11 @@ WH=0x0312
 WQ=0x0012
 MN=0x0000
 HK=1
+dc = ctypes.windll.user32.GetDC(0)
+dpi = ctypes.windll.gdi32.GetDeviceCaps(dc, 88)
+ctypes.windll.user32.ReleaseDC(0, dc)
+BASE_W = 1.4
+W = (dpi / 96) * BASE_W
 class MI(ctypes.Structure):
     _fields_=[("dx",ctypes.c_long),("dy",ctypes.c_long),("mouseData",ctypes.c_ulong),("dwFlags",ctypes.c_ulong),("time",ctypes.c_ulong),("dwExtraInfo",ctypes.POINTER(ctypes.c_ulong))]
 class I(ctypes.Structure):
