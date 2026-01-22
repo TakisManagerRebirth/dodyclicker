@@ -1,5 +1,7 @@
-nname: Build DodyClicker Windows
+name: Build DodyClicker Windows
 on: [push]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: windows-latest
@@ -20,8 +22,10 @@ jobs:
         run: |
           pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." --name "DodyClicker15" DodyClicker15.py
         shell: powershell
-      - name: Upload Executable
-        uses: actions/upload-artifact@v4
+      - name: Release Executable
+        uses: softprops/action-gh-release@v2
         with:
-          name: DodyClicker-Windows-Exe
-          path: dist/DodyClicker15.exe
+          tag_name: latest
+          files: dist/DodyClicker15.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
