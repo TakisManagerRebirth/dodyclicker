@@ -25,7 +25,7 @@ jobs:
 
       - name: Run PyInstaller
         run: |
-          pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." --name "DodyClicker16" DodyClicker16.py
+          pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." --name "dodyclicker16" dodyclicker16.py
         shell: powershell
 
       - name: Create Release
