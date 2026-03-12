@@ -25,7 +25,7 @@ jobs:
 
       - name: Run PyInstaller
         run: |
-          pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." --name "DodyClicker15" DodyClicker15.py
+          pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." --name "DodyClicker16" DodyClicker16.py
         shell: powershell
 
       - name: Create Release
@@ -33,6 +33,6 @@ jobs:
         with:
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
-          files: dist/DodyClicker15.exe
+          files: dist/DodyClicker16.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
