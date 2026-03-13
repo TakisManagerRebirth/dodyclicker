@@ -1,8 +1,8 @@
-!pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." dodyclicker16.py
+!pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." dodyclicker17.py
 
 Compilation instructions:
 Step 1: Open a python IDE like PyCharm or Thonny.
-Step 2: Open dodyclicker16.py
+Step 2: Open dodyclicker17.py
 Step 3: Paste line 1 of this .txt file into the terminal and execute
 Step 4: Finished exe is in the dist folder, contained in the same folder this txt is in
 I recommend you choose the latest version for smoothest experience because the previous versions are extremely buggy

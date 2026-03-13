@@ -7,8 +7,7 @@ IM,IK,MDL,MLU,MDR,MRU,KDN,KUP,WH,WQ,MN,HK=0,1,0x0002,0x0004,0x0008,0x0010,0x0000
 dc=user.GetDC(0)
 dpi=ctypes.windll.gdi32.GetDeviceCaps(dc,88)
 user.ReleaseDC(0,dc)
-BASE_W=1.4
-W=(dpi/96)*BASE_W
+W=1.4
 class MI(ctypes.Structure):
  _fields_=[("dx",ctypes.c_long),("dy",ctypes.c_long),("mouseData",ctypes.c_ulong),("dwFlags",ctypes.c_ulong),("time",ctypes.c_ulong),("dwExtraInfo",ctypes.POINTER(ctypes.c_ulong))]
 class KI(ctypes.Structure):
@@ -17,7 +16,12 @@ class II(ctypes.Union):
  _fields_=[("mi",MI),("ki",KI)]
 class I(ctypes.Structure):
  _fields_=[("type",ctypes.c_ulong),("ii",II)]
-clk,hk_vk,htid,q,auto_id,hk_id=False,0x75,0,queue.Queue(),None,None
+ctypes.windll.winmm.timeBeginPeriod(1)
+clk,hk_vk,htid,q,hk_id=False,0x75,0,queue.Queue(),None
+clk_event=threading.Event()
+iv_cache=0.0075
+mode_cache="LEFT"
+skv_cache=""
 D={
  "A":0x41,"B":0x42,"C":0x43,"D":0x44,"E":0x45,"F":0x46,"G":0x47,"H":0x48,"I":0x49,"J":0x4A,"K":0x4B,"L":0x4C,"M":0x4D,"N":0x4E,"O":0x4F,"P":0x50,
  "Q":0x51,"R":0x52,"S":0x53,"T":0x54,"U":0x55,"V":0x56,"W":0x57,"X":0x58,"Y":0x59,"Z":0x5A,
@@ -39,29 +43,30 @@ def sk(v,f):
  i=I(IK,II(ki=KI(v,ctypes.windll.user32.MapVirtualKeyW(v,0),f,0,None)))
  user.SendInput(1,ctypes.byref(i),ctypes.sizeof(i))
 def mc():
- if not clk:return
- m=mode.get()
- if m=="RIGHT":sm(MDR);sm(MRU)
- elif m=="LEFT":sm(MDL);sm(MLU)
+ if mode_cache=="RIGHT":sm(MDR);sm(MRU)
+ elif mode_cache=="LEFT":sm(MDL);sm(MLU)
  else:
-  v=skv.get().upper()
+  v=skv_cache.upper()
   if v in D:
    vk=D[v]
    sk(vk,KDN);sk(vk,KUP)
-def loop():
- global lc,auto_id
- n=time.perf_counter()
- if not clk:auto_id=root.after(1,loop);return
- try:
-  iv_val=float(iv.get())
-  if iv_val < 0.0075: iv_val = 0.0075
- except:iv_val=0.0075
- if clk and n-lc>=iv_val:mc();lc=n
- auto_id=root.after(1,loop)
+def click_thread():
+ while True:
+  clk_event.wait()
+  if not clk:clk_event.clear();continue
+  mc()
+  time.sleep(max(0,iv_cache-0.002))
 def toggle():
- global clk,lc
+ global clk,iv_cache,mode_cache,skv_cache
  clk=not clk
- lc=time.perf_counter()
+ if clk:
+  try:iv_cache=max(float(iv.get()),0.0075)
+  except:iv_cache=0.0075
+  mode_cache=mode.get()
+  skv_cache=skv.get()
+  clk_event.set()
+ else:
+  clk_event.clear()
  st.set("ON" if clk else "OFF")
  btn.config(text="Stop" if clk else "Start")
 def setkey():
@@ -75,21 +80,20 @@ def ht():
  htid=krnl.GetCurrentThreadId()
  while True:
   user.UnregisterHotKey(None,HK)
-  if not user.RegisterHotKey(None,HK,MN,hk_vk):break
+  user.RegisterHotKey(None,HK,MN,hk_vk)
   m=ctypes.wintypes.MSG()
   while user.GetMessageW(ctypes.byref(m),None,0,0)>0:
    if m.message==WH:q.put(1)
    elif m.message==WQ:break
   if m.message==WQ:continue
+  break
 def poll():
- running = True
- if not running:return
  try:
   while 1:q.get_nowait();toggle()
  except:pass
- if running:root.after(20,poll)
+ root.after(20,poll)
 root=tk.Tk()
-root.title("DodyClicker 1.6")
+root.title("DodyClicker 1.7")
 root.resizable(False,False)
 try:ctypes.windll.shcore.SetProcessDpiAwareness(1)
 except:pass
@@ -103,7 +107,7 @@ try:
  shutil.copy(src,wico_name);root.iconbitmap(wico_name)
 except:pass
 f=ttk.Frame(root,padding=int(10*W));f.grid()
-ttk.Label(f,text="DodyClicker 1.6",font=(F,int(12*W))).grid(row=0,column=0,sticky="w")
+ttk.Label(f,text="DodyClicker 1.7",font=(F,int(12*W))).grid(row=0,column=0,sticky="w")
 ttk.Label(f,text="Click wait (seconds):",font=(F,int(10*W))).grid(row=1,column=0,sticky="w")
 ttk.Entry(f,textvariable=iv,width=8,font=(F,int(10*W))).grid(row=1,column=1)
 ttk.Label(f,text="Trigger key:",font=(F,int(10*W))).grid(row=2,column=0,sticky="w")
@@ -118,14 +122,14 @@ ttk.Entry(f,textvariable=skv,width=8,font=(F,int(10*W))).grid(row=4,column=2,sti
 tk.Label(f,textvariable=st,width=8,relief="groove",anchor="center",font=(F,int(10*W))).grid(row=5,column=2,sticky="w")
 btn=ttk.Button(f,text="Start",command=toggle,width=12,padding=(1,5))
 btn.grid(row=5,column=1,pady=int(8*W),sticky="w")
-lc=time.perf_counter()
 threading.Thread(target=ht,daemon=True).start()
-root.after(5,loop)
+threading.Thread(target=click_thread,daemon=True).start()
 root.after(20,poll)
 root.bind_all("<Button-1>",lambda e:root.focus_set() if not isinstance(e.widget,tk.Entry) else None,add="+")
 def close():
  try:
-  if auto_id:root.after_cancel(auto_id)
+  ctypes.windll.winmm.timeEndPeriod(1)
+  clk_event.set()
   if htid:user.PostThreadMessageW(htid,WQ,0,0)
   user.UnregisterHotKey(None,HK)
   if wico_name:os.unlink(wico_name)
